@@ -379,7 +379,6 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         Calendar cal = Calendar.getInstance(this.timeZone);
         while(currentHour.before(sunriseYesterday))
         {
-            System.out.println(currentHour);
             if(this.dataMatrix.getParamDoubleValueForDate(currentHour, DataMatrix.BTG) >= BremiaLactucaeModel.LEAF_WETNESS_LOWER_THRESHOLD)
             {
                 consecutiveHours++;
