@@ -67,8 +67,8 @@ public class DataMatrix extends DateMap{
     public final static String ELWAST = "ELWAST";
     
     /**
-     * Max temp today (Rule #8)
+     * Max temp today (Rule #8) is TXD
      */
-    public final static String TXT = "TXT";
+    
 
 }

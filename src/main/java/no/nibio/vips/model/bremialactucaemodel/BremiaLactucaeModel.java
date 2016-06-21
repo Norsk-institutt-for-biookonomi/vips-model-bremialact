@@ -37,6 +37,7 @@ import no.nibio.vips.model.ConfigValidationException;
 import no.nibio.vips.model.Model;
 import no.nibio.vips.model.ModelExcecutionException;
 import no.nibio.vips.model.ModelId;
+import no.nibio.vips.util.CommonNamespaces;
 import no.nibio.vips.util.ModelUtil;
 import no.nibio.vips.util.WeatherUtil;
 
@@ -104,7 +105,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             {
                 if(this.dataMatrix.getParamIntValueForDate(currentDate, DataMatrix.ELWAST) == 1) // Enough leaf wetness today
                 {
-                    if(this.dataMatrix.getParamDoubleValueForDate(currentDate, DataMatrix.TXT) >= BremiaLactucaeModel.MAX_TEMP_THRESHOLD) // Too hot?
+                    if(this.dataMatrix.getParamDoubleValueForDate(currentDate, DataMatrix.TXD) >= BremiaLactucaeModel.MAX_TEMP_THRESHOLD) // Too hot?
                     {
                         warningStatus = Result.WARNING_STATUS_MINOR_RISK;
                     }
@@ -128,7 +129,8 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             result.setValue(BremiaLactucaeModel.MODEL_ID.toString(), DataMatrix.ERHLN, String.valueOf(this.dataMatrix.getParamIntValueForDate(currentDate, DataMatrix.ERHLN)));
             result.setValue(BremiaLactucaeModel.MODEL_ID.toString(), DataMatrix.SLN, String.valueOf(this.dataMatrix.getParamIntValueForDate(currentDate, DataMatrix.SLN)));
             result.setValue(BremiaLactucaeModel.MODEL_ID.toString(), DataMatrix.ELWAST, String.valueOf(this.dataMatrix.getParamIntValueForDate(currentDate, DataMatrix.ELWAST)));
-            result.setValue(BremiaLactucaeModel.MODEL_ID.toString(), DataMatrix.TXT, String.valueOf(this.dataMatrix.getParamDoubleValueForDate(currentDate, DataMatrix.TXT)));
+            result.setValue(CommonNamespaces.NS_WEATHER, DataMatrix.TXD, String.valueOf(this.dataMatrix.getParamDoubleValueForDate(currentDate, DataMatrix.TXD)));
+            result.setValue(BremiaLactucaeModel.MODEL_ID.toString(), "TXD_THRESHOLD", String.valueOf(BremiaLactucaeModel.MAX_TEMP_THRESHOLD));
             
             cal.setTime(currentDate);
             cal.add(Calendar.DATE,1);
@@ -333,7 +335,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             // Rule #7 (Enough leaf wetness after sunrise today)
             this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ELWAST, isEnoughLeafWetnessInPeriod(sunriseToday,endOfDataToday) ? 1:0);
             // Rule #8 (Max temp today)
-            this.dataMatrix.setParamDoubleValueForDate(currentDate, DataMatrix.TXT, getMaxTempForPeriod(currentDate, endOfDataToday));
+            this.dataMatrix.setParamDoubleValueForDate(currentDate, DataMatrix.TXD, getMaxTempForPeriod(currentDate, endOfDataToday));
             
             cal.setTime(currentDate);
             cal.add(Calendar.DATE,1);
