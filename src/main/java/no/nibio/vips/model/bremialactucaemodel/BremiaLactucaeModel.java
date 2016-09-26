@@ -41,7 +41,7 @@ import no.nibio.vips.util.ModelUtil;
 import no.nibio.vips.util.WeatherUtil;
 
 /**
- * Weather/rule based forecasting model for Bremua lactucae
+ * Weather/rule based forecasting model for Bremua lactucae (NO: Salatbladskimmel)
  * The factors are:
  * <ul>
  *      <li>Relative humidity > 93% consecutively for 4 hours the night before yesterday? [true/false]</li>
