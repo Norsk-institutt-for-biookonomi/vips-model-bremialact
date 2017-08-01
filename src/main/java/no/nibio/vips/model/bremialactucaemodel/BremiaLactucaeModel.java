@@ -312,7 +312,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             Date sunriseToday = this.getSunrise(currentDate);
             if(sunriseToday == null)
             {
-                throw new ModelExcecutionException("Not able to determine sunrise today. Too early?");
+                throw new ModelExcecutionException("Not able to determine sunrise today (" + currentDate + "). Too early?");
             }
             Date endOfDataToday = (thisDayInYear < lastDayWithWeatherData) ? justBeforeMidnight
                     : getDateWithCurrentTime(currentDate);
