@@ -90,7 +90,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         while(currentDate.compareTo(endDate) <= 0)
         {
             Result result = new ResultImpl();
-            result.setResultValidTime(currentDate);
+            result.setValidTimeStart(currentDate);
             
             // Deciding warning status
             Integer warningStatus = Result.WARNING_STATUS_NO_RISK;
