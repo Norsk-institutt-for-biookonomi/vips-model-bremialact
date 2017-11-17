@@ -74,16 +74,16 @@ public class BremiaLactucaeModelTest {
     @Test
     public void testGetResult() throws Exception {
         System.out.println("getResult");
-        ModelConfiguration config = this.getConfiguration("/lier_2015.json");
+        ModelConfiguration config = this.getConfiguration("/lier_2017.json");
         BremiaLactucaeModel instance = new BremiaLactucaeModel();
         instance.setConfiguration(config);
         List<Result> result = instance.getResult();
         assertNotNull(result);
         
-        /*for(Result r:result){
+        for(Result r:result){
             System.out.println(r.toString());   
             
-        }*/
+        }
     }
     /**
      * Test of getModelId method, of class BremiaLactucaeModel.
