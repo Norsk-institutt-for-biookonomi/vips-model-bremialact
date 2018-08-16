@@ -37,7 +37,9 @@ import no.nibio.vips.model.Model;
 import no.nibio.vips.model.ModelExcecutionException;
 import no.nibio.vips.model.ModelId;
 import no.nibio.vips.util.CommonNamespaces;
+import no.nibio.vips.util.DateUtil;
 import no.nibio.vips.util.ModelUtil;
+import no.nibio.vips.util.SolarRadiationUtil;
 import no.nibio.vips.util.WeatherUtil;
 
 /**
@@ -64,6 +66,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
     private WeatherUtil wUtil;
     private DataMatrix dataMatrix;
     private TimeZone timeZone;
+    private Double longitude, latitude;
     
     private final static Double NIGHT_RADIATION_THRESHOLD = 15.0;
     private final static Double LEAF_WETNESS_LOWER_THRESHOLD = 48.0;
@@ -225,6 +228,9 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
                 "\t},\n" +
                 "\t\"modelId\":\"" + MODEL_ID.toString() + "\",\n" +
                 "\t\"configParameters\":{\n" +
+                "\t\t\"timeZone\":\"Europe/Oslo\", \n" +
+                "\t\t\"longitude\":8.65055670321658, \n" +
+                "\t\t\"latitude\":59.85345355676463, \n" +
                 "\t\t\"observations\":[\n" +
                 "\t\t{\n" +
                 "\t\t\t\t\"timeMeasured\": \"2012-08-20T00:00:00+02:00\",\n" +
@@ -260,6 +266,19 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         this.dataMatrix = new DataMatrix();
         ObjectMapper objectMapper = new ObjectMapper();
         this.timeZone = TimeZone.getTimeZone((String) config.getConfigParameter("timeZone"));
+        this.longitude = objectMapper.convertValue(config.getConfigParameter("longitude"), Double.class);
+        this.latitude = objectMapper.convertValue(config.getConfigParameter("latitude"), Double.class);
+        
+        if(this.timeZone == null)
+        {
+            throw new ConfigValidationException("Missing configuration value: timeZone");
+        }
+        
+        if(this.longitude == null || this.latitude == null)
+        {
+            throw new ConfigValidationException("Missing geographic information: longitude=" + this.longitude + ", latitude=" + this.latitude);
+        }
+        
         // Getting weather data
         List<WeatherObservation> observations = objectMapper.convertValue(config.getConfigParameter("observations"), new TypeReference<List<WeatherObservation>>(){});
         for(WeatherObservation o:observations)
@@ -278,7 +297,8 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         // days before. (Sunset time the day before yesterday)
         Date firstTimeWithRH = this.dataMatrix.getFirstDateWithParameterValue(DataMatrix.UM);
         Date firstValidWeatherDataDate = wUtil.normalizeToExactDate(firstTimeWithRH, timeZone);
-        Date sunsetTime = this.getSunset(firstValidWeatherDataDate);
+        SolarRadiationUtil srUtil = new SolarRadiationUtil();
+        Date sunsetTime = srUtil.getSunsetTimeAtDate(this.latitude, this.longitude, firstValidWeatherDataDate, this.timeZone);
         
         // UM not present at sunset. Must move to next day
         if(sunsetTime.compareTo(firstTimeWithRH) < 0)
@@ -294,6 +314,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         Date lastTimeWithWeatherData = this.dataMatrix.getLastDateWithParameterValue(DataMatrix.UM);
         cal.setTime(lastTimeWithWeatherData);
         Integer lastDayWithWeatherData = cal.get(Calendar.DAY_OF_YEAR);
+        DateUtil dateUtil = new DateUtil();
         while(currentDate.before(lastTimeWithWeatherData))
         {
             // Day before yesterday
@@ -306,10 +327,10 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             cal.add(Calendar.DATE, 2);
             cal.add(Calendar.SECOND, -1);
             Date justBeforeMidnight = cal.getTime();
-            Date sunsetDayBeforeYesterday = this.getSunset(dayBeforeYesterday);
-            Date sunriseYesterday = this.getSunrise(yesterday);
-            Date sunsetYesterday = this.getSunset(yesterday);
-            Date sunriseToday = this.getSunrise(currentDate);
+            Date sunsetDayBeforeYesterday = srUtil.getSunsetTimeAtDate(this.latitude, this.longitude, dayBeforeYesterday, this.timeZone);
+            Date sunriseYesterday = srUtil.getSunriseTimeAtDate(this.latitude, this.longitude, yesterday, this.timeZone);
+            Date sunsetYesterday = srUtil.getSunsetTimeAtDate(this.latitude, this.longitude, yesterday, this.timeZone);
+            Date sunriseToday = srUtil.getSunriseTimeAtDate(this.latitude, this.longitude, currentDate, this.timeZone);
             if(sunriseToday == null)
             {
                 throw new ModelExcecutionException("Not able to determine sunrise today (" + currentDate + "). Too early?");
@@ -320,19 +341,34 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             //System.out.println(currentDate + ": sunsetYesterday=" + sunsetYesterday + ", sunriseToday=" + sunriseToday  );
             
             // Rule #1 & #2 (Sporulation the night before yesterday?)
-            Boolean enoughRelativeHumidityYesterdayNight = isEnoughRelativeHumidityInPeriod(sunsetDayBeforeYesterday,sunriseYesterday);
+            Boolean enoughRelativeHumidityYesterdayNight = isEnoughRelativeHumidityInPeriod(
+                    dateUtil.getClosestFutureWholeHour(sunsetDayBeforeYesterday),
+                    dateUtil.getClosestPastWholeHour(sunriseYesterday)
+            );
             this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ERHYN, enoughRelativeHumidityYesterdayNight ? 1:0);
             this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.SYN, enoughRelativeHumidityYesterdayNight ? 1:0);
             // Rule #3 (Enough LW between sunrise yesterday and sunrise today?
-            this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ELWASYBST, isEnoughLeafWetnessInPeriod(sunriseYesterday, sunriseToday) ? 1:0);
+            this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ELWASYBST, isEnoughLeafWetnessInPeriod(
+                    dateUtil.getClosestFutureWholeHour(sunriseYesterday), 
+                    dateUtil.getClosestPastWholeHour(sunriseToday)
+                ) ? 1:0);
             // Rule #4 (Max temp between sunrise yesterday and sunrise today)
-            this.dataMatrix.setParamDoubleValueForDate(currentDate, DataMatrix.TXASYBST, getMaxTempForPeriod(sunriseYesterday, sunriseToday));
+            this.dataMatrix.setParamDoubleValueForDate(currentDate, DataMatrix.TXASYBST, getMaxTempForPeriod(
+                    dateUtil.getClosestFutureWholeHour(sunriseYesterday),
+                    dateUtil.getClosestPastWholeHour(sunriseToday)
+                ));
             // Rule #5 & #6 (Sporulation last night?)
-            Boolean enoughRelativeHumidityLastNight = isEnoughRelativeHumidityInPeriod(sunsetYesterday,sunriseToday);
+            Boolean enoughRelativeHumidityLastNight = isEnoughRelativeHumidityInPeriod(
+                    dateUtil.getClosestFutureWholeHour(sunsetYesterday),
+                    dateUtil.getClosestPastWholeHour(sunriseToday)
+            );
             this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ERHLN, enoughRelativeHumidityLastNight ? 1:0);
             this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.SLN, enoughRelativeHumidityLastNight ? 1:0);
             // Rule #7 (Enough leaf wetness after sunrise today)
-            this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ELWAST, isEnoughLeafWetnessInPeriod(sunriseToday,endOfDataToday) ? 1:0);
+            this.dataMatrix.setParamIntValueForDate(currentDate, DataMatrix.ELWAST, isEnoughLeafWetnessInPeriod(
+                    dateUtil.getClosestFutureWholeHour(sunriseToday),
+                    dateUtil.getClosestPastWholeHour(endOfDataToday)
+                ) ? 1:0);
             // Rule #8 (Max temp today)
             this.dataMatrix.setParamDoubleValueForDate(currentDate, DataMatrix.TXD, getMaxTempForPeriod(currentDate, endOfDataToday));
             
@@ -340,37 +376,6 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
             cal.add(Calendar.DATE,1);
             currentDate = cal.getTime();
         }
-    }
-
-    public Date getSunset(Date theDate) {
-        Calendar cal = Calendar.getInstance(timeZone);
-        cal.setTime(theDate);
-        // Sunset may only appear until between 18:00:00 and midnight(23:00:00)
-        for(int theHour = 18; theHour <= 23; theHour++)
-        {
-            cal.set(Calendar.HOUR_OF_DAY, theHour);
-            if(this.dataMatrix.getParamDoubleValueForDate(cal.getTime(), DataMatrix.Q0) <= NIGHT_RADIATION_THRESHOLD)
-            {
-                return cal.getTime();
-            }
-        }
-        return null;
-    }
-    
-    public Date getSunrise(Date theDate)
-    {
-        Calendar cal = Calendar.getInstance(timeZone);
-        cal.setTime(theDate);
-        // Sunrise may only appear until between 00:00:00 and noon(10:00:00)
-        for(int theHour = 0; theHour <= 10; theHour++)
-        {
-            cal.set(Calendar.HOUR_OF_DAY, theHour);
-            if(this.dataMatrix.getParamDoubleValueForDate(cal.getTime(), DataMatrix.Q0) >= NIGHT_RADIATION_THRESHOLD)
-            {
-                return cal.getTime();
-            }
-        }
-        return null;
     }
 
     private Boolean isEnoughLeafWetnessInPeriod(Date sunsetDayBeforeYesterday, Date sunriseYesterday) {

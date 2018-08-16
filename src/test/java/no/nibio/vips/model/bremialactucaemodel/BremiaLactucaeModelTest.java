@@ -75,6 +75,8 @@ public class BremiaLactucaeModelTest {
     public void testGetResult() throws Exception {
         System.out.println("getResult");
         ModelConfiguration config = this.getConfiguration("/lier_2017.json");
+        config.setConfigParameter("longitude", 10.25962);
+        config.setConfigParameter("latitude", 59.79084);
         BremiaLactucaeModel instance = new BremiaLactucaeModel();
         instance.setConfiguration(config);
         List<Result> result = instance.getResult();
@@ -184,45 +186,12 @@ public class BremiaLactucaeModelTest {
     public void testSetConfiguration() throws Exception {
         System.out.println("setConfiguration");
         ModelConfiguration config = this.getConfiguration("/lier_2015.json");
+        config.setConfigParameter("longitude", 10.25962);
+        config.setConfigParameter("latitude", 59.79084);
         BremiaLactucaeModel instance = new BremiaLactucaeModel();
         instance.setConfiguration(config);
         
     }
-    
-    @Test
-    public void testGetSunset() throws Exception {
-        System.out.println("getSunset");
-        ModelConfiguration config = this.getConfiguration("/lier_2015.json");
-        BremiaLactucaeModel instance = new BremiaLactucaeModel();
-        instance.setConfiguration(config);
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Oslo"));
-        cal.set(2015, Calendar.JUNE, 22, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND,0);
-        Date testDate = cal.getTime();
-        
-        cal.set(Calendar.HOUR_OF_DAY, 22);
-        Date expResult = cal.getTime();
-        Date result = instance.getSunset(testDate);
-        assertEquals(expResult, result);
-    }
-    
-    @Test
-    public void testGetSunrise() throws Exception {
-        System.out.println("getSunset");
-        ModelConfiguration config = this.getConfiguration("/lier_2015.json");
-        BremiaLactucaeModel instance = new BremiaLactucaeModel();
-        instance.setConfiguration(config);
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Oslo"));
-        cal.set(2015, Calendar.JUNE, 23, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND,0);
-        Date testDate = cal.getTime();
-        
-        cal.set(Calendar.HOUR_OF_DAY, 5);
-        Date expResult = cal.getTime();
-        Date result = instance.getSunrise(testDate);
-        assertEquals(expResult, result);
-    }
-    
     
     private ModelConfiguration getConfiguration(String fileName)
     {
