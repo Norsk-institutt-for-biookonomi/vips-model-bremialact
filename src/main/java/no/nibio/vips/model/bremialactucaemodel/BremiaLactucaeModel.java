@@ -436,7 +436,10 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         Calendar cal = Calendar.getInstance(this.timeZone);
         while(startTime.compareTo(endTime) <= 0)
         {
-            Double txHour = this.dataMatrix.getParamDoubleValueForDate(startTime, DataMatrix.TX);
+            // Using TM as fallback for TX
+            Double txHour = this.dataMatrix.getParamValueForDate(startTime, DataMatrix.TX) != null ? 
+                    this.dataMatrix.getParamDoubleValueForDate(startTime, DataMatrix.TX)
+                    : this.dataMatrix.getParamDoubleValueForDate(startTime, DataMatrix.TM);
             maxTemp = Math.max(maxTemp, txHour);
             cal.setTime(startTime);
             cal.add(Calendar.HOUR_OF_DAY, 1);

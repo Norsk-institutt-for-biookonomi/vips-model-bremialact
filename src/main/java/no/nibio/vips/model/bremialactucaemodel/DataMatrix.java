@@ -53,6 +53,11 @@ public class DataMatrix extends DateMap{
     public final static String TX = "TX";
     
     /**
+     * Mean temp hourly
+     */
+    public final static String TM = "TM";
+    
+    /**
      * Enough relative humidity last night? (Rule #5) 1 or 0
      */
     public final static String ERHLN = "ERHLN";
