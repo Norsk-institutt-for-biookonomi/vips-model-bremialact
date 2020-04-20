@@ -285,6 +285,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         {
             this.dataMatrix.setParamDoubleValueForDate(o.getTimeMeasured(), o.getElementMeasurementTypeId(), o.getValue());   
         }
+        //System.out.println(this.dataMatrix.toCSV());
     }
 
     /**
@@ -336,9 +337,10 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
                 throw new ModelExcecutionException("Not able to determine sunrise today (" + currentDate + "). Too early?");
             }
             Date endOfDataToday = (thisDayInYear < lastDayWithWeatherData) ? justBeforeMidnight
-                    : getDateWithCurrentTime(currentDate);
+                    : getDateWithCurrentTime(currentDate).before(lastTimeWithWeatherData) ? getDateWithCurrentTime(currentDate)
+                    : lastTimeWithWeatherData;
             
-            //System.out.println(currentDate + ": sunsetYesterday=" + sunsetYesterday + ", sunriseToday=" + sunriseToday  );
+            //System.out.println(currentDate + ": sunsetYesterday=" + sunsetYesterday + ", sunriseToday=" + sunriseToday + ", endOfDataToday=" + endOfDataToday  );
             
             // Rule #1 & #2 (Sporulation the night before yesterday?)
             Boolean enoughRelativeHumidityYesterdayNight = isEnoughRelativeHumidityInPeriod(
