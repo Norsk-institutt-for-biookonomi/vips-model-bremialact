@@ -280,7 +280,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         }
         
         // Getting weather data
-        List<WeatherObservation> observations = objectMapper.convertValue(config.getConfigParameter("observations"), new TypeReference<List<WeatherObservation>>(){});
+        List<WeatherObservation> observations = this.modelUtil.extractWeatherObservationList(config.getConfigParameter("observations"));
         for(WeatherObservation o:observations)
         {
             this.dataMatrix.setParamDoubleValueForDate(o.getTimeMeasured(), o.getElementMeasurementTypeId(), o.getValue());   
