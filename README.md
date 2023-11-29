@@ -5,8 +5,10 @@ This repository contains the implementation of the Bremia Lactucae model.
 
 
 <p><img src="src/main/resources/images/salatbladskimmel.jpg" title="Salatbladskimmel. (Foto: Erling Fl&oslash;istad, NIBIO)"/></p>
+
 **(Norwegian model description only)**
- <p>Salatbladskimmel. (Foto: Erling Fl&oslash;istad, NIBIO)</p>
+
+<p>Salatbladskimmel. (Foto: Erling Fl&oslash;istad, NIBIO)</p>
 </p>
 <p>Modellen beregner om det er fare for bladskimmelinfeksjoner ut fra v&aelig;rdata. Smitte m&aring; imidlertid v&aelig;re tilstede for at infeksjoner virkelig skjer. Kriterier for b&aring;de sporulering og infeksjon m&aring; v&aelig;re oppfylt for at modellen beregner infeksjonsfare:</p>
 <ul>
