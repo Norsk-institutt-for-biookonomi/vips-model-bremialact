@@ -18,7 +18,7 @@ This repository contains the implementation of the Bremia Lactucae model.
 <p>Ved varsel om fare for bladskimmelinfeksjoner b&oslash;r spr&oslash;yting vurderes ut fra de aktuelle salatsortenes resistens mot bladskimmel og tidspunkt ved forrige behandling. Har det g&aring;tt mer enn 7 dager fra siste behandling, sjekkes VIPS hver formiddag. Det er normalt ikke aktuelt &aring; spr&oslash;yte oftere enn hver 10. dag, men ved hyppig varsel og p&aring;vist angrep av salatbladskimmel i omr&aring;det kan man vurdere en ny behandling ved varsel dersom det er mer enn 7 dager siden forrige behandling.</p>
 <p>Mer om salatbladskimmel finner du i <a href="http://www.bioforsk.no/ikbViewer/page/tjenester/publikasjoner/publikasjon?p_document_id=30839" target="_blank" rel="noopener"> Bioforsk TEMA: <em>Strategier for bekjempelse av salatbladskimmel</em></a> og i <a href="https://www.plantevernleksikonet.no/l/oppslag/487/" target="new" > <em>Plantevernleksikonet</em></a></p>
 
-## Development
+### Development
 
 Clone Gitlab repository
 
