@@ -6,7 +6,7 @@ This repository contains the implementation of the Bremia Lactucae model.
 
 Contact person: [Berit Nordskog](https://nibio.no/en/employees/berit-nordskog)
 
-<p><img src="src/main/resources/images/salatbladskimmel.jpg" title="Salatbladskimmel. (Foto: Erling Fl&oslash;istad, NIBIO)"/></p>
+<p><img src="src/main/resources/images/salatbladskimmel.jpg" title="Salatbladskimmel. (Foto: Erling Fl&oslash;istad, NIBIO)" style="height:428px"/><img src="src/main/resources/images/salatbladskimmel_2.jpg" title="Salatbladskimmel. (Foto: Erling Fl&oslash;istad, NIBIO)" style="height:428px"/></p>
 <p>Lettuce Downey Mildew. (Photo: Erling Fl&oslash;istad, NIBIO)</p>
 
 This model calculates infection risk of lettuce downy mildew (*Bremia lactucae*) using weather data and weather prognosis. The model is of relevance for field grown lettuce.  
