@@ -180,7 +180,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
 
     @Override
     public String getCopyright() {
-        return "(c) 2016 NIBIO (http://www.nibio.no/). Contact: post@nibio.no";
+        return "(c) 2016-2025 NIBIO (https://nibio.no/). Contact: post@nibio.no";
     }
 
     @Override
@@ -196,6 +196,7 @@ public class BremiaLactucaeModel extends I18nImpl implements Model {
         }
         catch(IOException ex)
         {
+            ex.printStackTrace();
             return this.getText("description", language);
         }
     }
